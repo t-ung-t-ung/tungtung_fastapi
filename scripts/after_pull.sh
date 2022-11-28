@@ -1,1 +1,1 @@
-conda env update --name tungtung-fastapi --file env/conda.yaml --prune
+conda env update --file env/conda.yaml --prune
