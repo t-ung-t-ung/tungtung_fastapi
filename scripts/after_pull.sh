@@ -1,1 +1,1 @@
-conda env update --file env/conda.yaml --prune
+pip install -r requirements.txt

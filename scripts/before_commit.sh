@@ -1,1 +1,1 @@
-conda env export > env/conda.yaml
+pip list --format=freeze > requirements.txt
