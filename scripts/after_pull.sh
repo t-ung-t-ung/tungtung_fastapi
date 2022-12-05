@@ -1,1 +1,1 @@
-pip install -r requirements.txt
+conda env update -f env.yaml
