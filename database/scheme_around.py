@@ -39,6 +39,11 @@ class UserPromise(SQLModel, table=True):
     promise_id: int = Field(foreign_key='promise.id')
     is_auth: bool
 
+class Category(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    image: str
+
 
 class Chat(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
