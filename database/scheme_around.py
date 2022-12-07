@@ -3,6 +3,22 @@ from datetime import datetime
 from sqlmodel import Field, SQLModel
 
 
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    kakao_id: int = Field(unique=True)
+    nickname: str
+    image: str
+
+
+class Evaluation(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    evaluator: int = Field(foreign_key='user.id')
+    evaluated_user: int = Field(foreign_key='user.id')
+    promise_id: int = Field(foreign_key="promise.id")
+    content: str
+    star: int
+
+
 class Promise(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     owner: int = Field(foreign_key="user.id")
