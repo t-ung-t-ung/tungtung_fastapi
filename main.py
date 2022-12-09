@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+
 from routers import promise, user
 
-from database.database import init_database, engine
+from database.database import init_database
 from routers import promise, user
 
 
