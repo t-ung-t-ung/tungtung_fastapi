@@ -1,5 +1,10 @@
 from fastapi import FastAPI
+
+from database.database import init_database
 from routers import promise, user
+
+
+init_database()
 
 app = FastAPI()
 

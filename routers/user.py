@@ -1,8 +1,11 @@
 from fastapi import APIRouter
+from sqlalchemy.future import Engine
 
 router = APIRouter(
     prefix="/user"
 )
+
+engine: Engine
 
 
 @router.get("/")
