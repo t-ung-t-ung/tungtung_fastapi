@@ -8,13 +8,25 @@ router = APIRouter(
 )
 
 
-# @router.get("/")
-# async def get_promises():
-#     with Session(engine) as session:
-#         statement = select(Promise)
-#         results = session.exec(statement)
-#         for promise in results:
-            # json 배열에 넣기
+@router.get("/")
+async def get_promises():
+    result = []
+    with Session(engine) as session:
+        statement = select(Promise)
+        promises = session.exec(statement)
+        for promise in promises:
+            owner = getUserNickname(promise.owner)
+            category = getCategoryName(promise.category_id)
+            result.append({"id": promise.id,
+                           "owner": owner,
+                           "category": category,
+                           "detail": promise.detail,
+                           "longitude": promise.longitude,
+                           "latitude": promise.latitude,
+                           "datetime": promise.promise_time,
+                           "status": promise.status})
+        return result
+
 
 
 
