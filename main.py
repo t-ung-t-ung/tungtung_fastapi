@@ -25,7 +25,7 @@ async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
 
-@app.get("/webhook")
+@app.post("/webhook")
 async def webhook(anything: dict = {}):
     print(anything)
     return {}
