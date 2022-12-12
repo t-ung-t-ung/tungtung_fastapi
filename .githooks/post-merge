@@ -1,2 +1,1 @@
-mkdir sdafkjdaslkfjkl
-mkdir dsfasdf
+conda env update -f env.yaml
