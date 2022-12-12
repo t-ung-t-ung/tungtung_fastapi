@@ -29,6 +29,6 @@ async def say_hello(name: str):
 @app.post("/webhook")
 async def webhook(anything: dict | None = None):
     if anything.get('ref') == 'refs/heads/master':
-        print("master pushed")
+        print("master pushed333")
         os.system("git pull origin master --no-edit")
     return {}
