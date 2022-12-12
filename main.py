@@ -28,6 +28,11 @@ async def say_hello(name: str):
 
 @app.post("/webhook")
 async def webhook(anything: dict | None = None):
-    print("pushed something")
+    if anything.get('ref') == 'refs/heads/master':
+        print("master pushed")
+        os.system("mkdir master")
+    else:
+        print("another pushed")
+        os.system("mkdir another")
 
     return {}
