@@ -1,12 +1,14 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 from sqlmodel import Session, select
-from database.scheme_around import Promise
+from database.scheme_around import Promise, User
 from database.database import engine, getUserNickname, getCategoryName
 
 router = APIRouter(
     prefix="/promise"
 )
 
+## join으로 바꾸기
 
 @router.get("/")
 async def get_promises():
@@ -28,8 +30,6 @@ async def get_promises():
         return result
 
 
-
-
 @router.get("/{promise_id}")
 async def get_promise(promise_id: int):
     with Session(engine) as session:
@@ -46,3 +46,11 @@ async def get_promise(promise_id: int):
                 "latitude": promise.latitude,
                 "datetime": promise.promise_time,
                 "status": promise.status}
+
+
+# @router.post("/")
+# async def post_promise(newPromise: Promise):
+#     with Session(engine) as session:
+#         session.add(newPromise)
+#         session.commit()
+#         return {"result": 1}
