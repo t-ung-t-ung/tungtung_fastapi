@@ -7,6 +7,7 @@ with open("env.yaml", "a") as env:
             if k:
                 env.write(line)
             if line.find("- pip:") != -1:
+                env.write(":")
                 k = True
         os.remove("temp.yaml")
 
