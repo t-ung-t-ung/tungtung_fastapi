@@ -26,6 +26,6 @@ async def say_hello(name: str):
 
 
 @app.get("/webhook")
-async def webhook():
-    print("sdfsdfsdf")
+async def webhook(anything: dict = {}):
+    print(anything)
     return {}
