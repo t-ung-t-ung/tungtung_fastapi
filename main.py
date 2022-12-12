@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from httpx import AsyncClient
 
 from database.database import init_database
 from routers import promise, user, auth
@@ -24,3 +23,8 @@ async def root():
 @app.get("/hello/{name}")
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
+
+@app.get("/webhook")
+async def webhook():
+    print("sdfsdfsdf")
+    return {}
