@@ -1,5 +1,5 @@
 from sqlalchemy.future import Engine
-from sqlmodel import create_engine, SQLModel, Session
+from sqlmodel import create_engine, SQLModel, Session, select
 from database import scheme_around
 from database.scheme_around import User
 
@@ -15,9 +15,9 @@ def init_database():
     SQLModel.metadata.create_all(engine)
 
 
-def get_user_by_kakao_id(kakao_id: str):
+def get_user(user_id: str):
     with Session(engine) as session:
-        statement = select(User).where(User.kakao_id == kakao_id)
+        statement = select(User).where(User.id == user_id)
         user = session.exec(statement).one_or_none()
         return user
 
