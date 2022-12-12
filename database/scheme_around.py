@@ -21,16 +21,16 @@ class Evaluation(SQLModel, table=True):
 
 class Promise(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    owner: int = Field(foreign_key="user.id")
-    category_id: int = Field(foreign_key="category.id")
-    title: str
-    detail: str
-    latitude: float
-    longitude: float
-    promise_time: datetime
-    image: str
-    max_people: int
-    status: int
+    owner: int | None = Field(foreign_key="user.id", nullable=False)
+    category_id: int | None = Field(foreign_key="category.id", nullable=False)
+    title: str | None = Field(nullable=False)
+    detail: str | None = Field(nullable=False)
+    latitude: float | None = Field(nullable=False)
+    longitude: float | None = Field(nullable=False)
+    promise_time: datetime | None = Field(nullable=False)
+    image: str | None = Field(nullable=False)
+    max_people: int | None = Field(nullable=False)
+    status: int | None = Field(nullable=False)
 
 
 class UserPromise(SQLModel, table=True):

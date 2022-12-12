@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from httpx import AsyncClient
-
 from database.database import init_database
 from routers import promise, user, auth
 
@@ -15,7 +13,6 @@ app.include_router(auth.router)
 def on_startup():
     init_database()
 
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -23,4 +20,4 @@ async def root():
 
 @app.get("/hello/{name}")
 async def say_hello(name: str):
-    return {"message": f" {name}"}
+    return {"message": f"Hello {name}"}
