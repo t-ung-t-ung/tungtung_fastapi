@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from database.database import init_database
 from routers import promise, user, auth
+import os
 
 app = FastAPI()
 
@@ -27,5 +28,6 @@ async def say_hello(name: str):
 
 @app.post("/webhook")
 async def webhook(anything: dict | None = None):
-    print(anything, "som")
+    print("pushed something")
+
     return {}
