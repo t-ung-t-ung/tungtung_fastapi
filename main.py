@@ -30,9 +30,5 @@ async def say_hello(name: str):
 async def webhook(anything: dict | None = None):
     if anything.get('ref') == 'refs/heads/master':
         print("master pushed")
-        os.system("mkdir master")
-    else:
-        print("another pushed.")
-        os.system("mkdir another")
-
+        os.system("git pull origin master --no-edit")
     return {}
