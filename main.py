@@ -2,12 +2,13 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 
 from database.database import init_database
-from routers import promise, user
+from routers import promise, user, auth
 
 app = FastAPI()
 
 app.include_router(promise.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.on_event("startup")
