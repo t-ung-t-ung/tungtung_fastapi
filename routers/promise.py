@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlmodel import Session, select
-from database.scheme_around import Promise, User
+from database.scheme_around import Promise, User, UserPromise
 from database.database import engine, getUser, getCategoryName, getUsersInPromise
 
 router = APIRouter(
@@ -13,11 +14,16 @@ async def get_promises():
     result = []
     with Session(engine) as session:
         statement = select(Promise)
-        promises = session.exec(statement)
+        promises = session.exec(statement).all()
+        test = session.query(Promise.id, func.count(UserPromise.user_id)).join(UserPromise).filter(Promise.id == UserPromise.promise_id).group_by(UserPromise.promise_id).all()
+        # 0인 애들 처리 해주기 이 방법은 너무 구려
+        tmp = [0 for i in range(len(promises))]
+        for t in test:
+            tmp[t[0]-1] = t[1]
+        print(tmp)
         for promise in promises:
             owner = getUser(promise.owner)
             category = getCategoryName(promise.category_id)
-            participants = getUsersInPromise(promise.id)
             result.append({"id": promise.id,
                            "owner": owner["nickname"],
                            "category": category,
@@ -28,7 +34,7 @@ async def get_promises():
                            "promise_time": promise.promise_time,
                            "image": promise.image,
                            "max_people": promise.max_people,
-                           "current_people": len(participants)+1,
+                           "current_people": tmp[promise.id-1]+1,
                            "status": promise.status})
         return result
 
