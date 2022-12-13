@@ -2,13 +2,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from database.scheme_around import Promise, User
-from database.database import engine, getUserNickname, getCategoryName
+from database.database import engine, getUserNickname, getCategoryName, getUsersInPromise
 
 router = APIRouter(
     prefix="/promise"
 )
-
-## join으로 바꾸기
 
 @router.get("/")
 async def get_promises():
@@ -19,13 +17,18 @@ async def get_promises():
         for promise in promises:
             owner = getUserNickname(promise.owner)
             category = getCategoryName(promise.category_id)
+            participants = getUsersInPromise(promise.id)
             result.append({"id": promise.id,
                            "owner": owner,
                            "category": category,
+                           "title": promise.title,
                            "detail": promise.detail,
                            "longitude": promise.longitude,
                            "latitude": promise.latitude,
-                           "datetime": promise.promise_time,
+                           "promise_time": promise.promise_time,
+                           "image": promise.image,
+                           "max_people": promise.max_people,
+                           "current_people": len(participants)+1,
                            "status": promise.status})
         return result
 
@@ -44,7 +47,9 @@ async def get_promise(promise_id: int):
                 "detail": promise.detail,
                 "longitude": promise.longitude,
                 "latitude": promise.latitude,
-                "datetime": promise.promise_time,
+                "promise_time": promise.promise_time,
+                "image": promise.image,
+                "max_people": promise.max_people,
                 "status": promise.status}
 
 
