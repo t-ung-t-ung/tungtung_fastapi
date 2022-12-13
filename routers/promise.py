@@ -20,7 +20,6 @@ async def get_promises():
         tmp = [0 for i in range(len(promises))]
         for t in test:
             tmp[t[0]-1] = t[1]
-        print(tmp)
         for promise in promises:
             owner = getUser(promise.owner)
             category = getCategoryName(promise.category_id)
