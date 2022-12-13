@@ -15,11 +15,13 @@ def init_database():
 
     SQLModel.metadata.create_all(engine)
 
-def getUserNickname(user_id: int):
+def getUser(user_id: int):
     with Session(engine) as session:
         statement = select(User).where(User.id == user_id)
         user = session.exec(statement).one_or_none()
-        return user.nickname
+        return {"id": user.id,
+                "nickname": user.nickname,
+                "image": user.image}
 
 def getCategoryName(category_id: int):
     with Session(engine) as session:

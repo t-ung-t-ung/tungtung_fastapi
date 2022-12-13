@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from database.scheme_around import Promise, User
-from database.database import engine, getUserNickname, getCategoryName, getUsersInPromise
+from database.database import engine, getUser, getCategoryName, getUsersInPromise
 
 router = APIRouter(
     prefix="/promise"
@@ -15,11 +15,11 @@ async def get_promises():
         statement = select(Promise)
         promises = session.exec(statement)
         for promise in promises:
-            owner = getUserNickname(promise.owner)
+            owner = getUser(promise.owner)
             category = getCategoryName(promise.category_id)
             participants = getUsersInPromise(promise.id)
             result.append({"id": promise.id,
-                           "owner": owner,
+                           "owner": owner["nickname"],
                            "category": category,
                            "title": promise.title,
                            "detail": promise.detail,
@@ -38,8 +38,9 @@ async def get_promise(promise_id: int):
     with Session(engine) as session:
         statement = select(Promise).where(Promise.id == promise_id)
         promise = session.exec(statement).one_or_none()
-        owner = getUserNickname(promise.owner)
+        owner = getUser(promise.owner)
         category = getCategoryName(promise.category_id)
+        participants = getUsersInPromise(promise.id)
         return {"id": promise.id,
                 "owner": owner,
                 "category": category,
@@ -50,6 +51,7 @@ async def get_promise(promise_id: int):
                 "promise_time": promise.promise_time,
                 "image": promise.image,
                 "max_people": promise.max_people,
+                "current_people": participants,
                 "status": promise.status}
 
 
