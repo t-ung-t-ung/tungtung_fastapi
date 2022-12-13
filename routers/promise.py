@@ -1,7 +1,9 @@
+import decimal
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from database.scheme_around import Promise, User, UserPromise
 from database.database import engine, getUser, getCategoryName, getUsersInPromise
 
@@ -9,33 +11,23 @@ router = APIRouter(
     prefix="/promise"
 )
 
+
 @router.get("/")
 async def get_promises():
-    result = []
     with Session(engine) as session:
-        statement = select(Promise)
-        promises = session.exec(statement).all()
-        test = session.query(Promise.id, func.count(UserPromise.user_id)).join(UserPromise).filter(Promise.id == UserPromise.promise_id).group_by(UserPromise.promise_id).all()
-        # 0인 애들 처리 해주기 이 방법은 너무 구려
-        tmp = [0 for i in range(len(promises))]
-        for t in test:
-            tmp[t[0]-1] = t[1]
-        for promise in promises:
-            owner = getUser(promise.owner)
-            category = getCategoryName(promise.category_id)
-            result.append({"id": promise.id,
-                           "owner": owner["nickname"],
-                           "category": category,
-                           "title": promise.title,
-                           "detail": promise.detail,
-                           "longitude": promise.longitude,
-                           "latitude": promise.latitude,
-                           "promise_time": promise.promise_time,
-                           "image": promise.image,
-                           "max_people": promise.max_people,
-                           "current_people": tmp[promise.id-1]+1,
-                           "status": promise.status})
-        return result
+        output = []
+
+        statement = select(Promise, func.sum(UserPromise.id)).join(UserPromise, isouter=True).group_by(Promise.id)
+        results = session.exec(statement)
+        for promise, user_number in results:
+            if user_number:
+                user_number = int(user_number)
+            else:
+                user_number = 0
+            new_promise: dict = promise.dict()
+            new_promise["people"] = user_number
+            output.append(new_promise)
+        return output
 
 
 @router.get("/{promise_id}")
@@ -58,7 +50,6 @@ async def get_promise(promise_id: int):
                 "max_people": promise.max_people,
                 "current_people": participants,
                 "status": promise.status}
-
 
 # @router.post("/")
 # async def post_promise(newPromise: Promise):
