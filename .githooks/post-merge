@@ -1,2 +1,2 @@
 conda update -n base -c defaults conda -y
-python3 .githooks/_post_merge.py
+python .githooks/_post_merge.py
