@@ -17,7 +17,7 @@ async def get_promises():
     with Session(engine) as session:
         output = []
 
-        statement = select(Promise, func.sum(UserPromise.id)).join(UserPromise, isouter=True).group_by(Promise.id)
+        statement = select(Promise, func.count(UserPromise.id)).join(UserPromise, isouter=True).group_by(Promise.id)
         results = session.exec(statement)
         for promise, user_number in results:
             if user_number:
