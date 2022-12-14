@@ -1,5 +1,6 @@
 import os
 
+# like Linux <-> Windows
 compatibility = False
 
 if compatibility:
