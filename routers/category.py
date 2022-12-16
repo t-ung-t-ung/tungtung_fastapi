@@ -1,7 +1,7 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Body
 from sqlmodel import Session, select
 
-from database.scheme_around import Category, CategoryCreate
+from database.scheme_around import Category
 from database.database import engine
 
 
@@ -19,9 +19,12 @@ async def get_all_category():
 
 
 @router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED)
-async def create_category(body: CategoryCreate):
+async def create_category(category: Category = Body(
+    example=Category(
+        name="운동",
+        image="image_url").json(exclude_none=True)
+)):
     with Session(engine) as session:
-        category = Category.from_orm(body)
         session.add(category)
         session.commit()
         session.refresh(category)
