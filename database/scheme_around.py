@@ -45,6 +45,10 @@ class Category(SQLModel, table=True):
     name: str
     image: str
 
+class CategoryCreate(SQLModel):
+    name: str
+    image: str
+
 
 class Chat(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
