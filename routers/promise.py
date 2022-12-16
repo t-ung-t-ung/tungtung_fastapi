@@ -1,8 +1,6 @@
 import decimal
 
 from fastapi import APIRouter
-from pydantic import BaseModel
-from sqlalchemy import func
 from sqlmodel import Session, select, func
 from database.scheme_around import Promise, User, UserPromise, Category
 from database.database import engine, get_participants
