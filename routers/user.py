@@ -1,21 +1,20 @@
 from fastapi import APIRouter, Depends
-
-from sqlmodel import select, Session, create_engine
+from passlib.context import CryptContext
+from pydantic import BaseModel
+from sqlmodel import Session, select
 
 from database.database import engine
 from database.scheme_around import User
+from network.http_client import client
 
 router = APIRouter(
     prefix="/user"
 )
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-@router.get("/")
-async def get_users():
-    with Session(engine) as session:
-        user = session.exec(select(User)).one_or_none()
 
-    return {"promises": user.nickname}
+
 
 
 @router.get("/{user_id}")
