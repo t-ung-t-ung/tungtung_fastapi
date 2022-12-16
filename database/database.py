@@ -29,8 +29,7 @@ def getCategoryName(category_id: int):
         category = session.exec(statement).one_or_none()
         return category.name
 
-def getUsersInPromise(promise_id: int):
-    with Session(engine) as session:
-        statement = select(User).join(UserPromise).where(UserPromise.promise_id == promise_id)
-        users = session.exec(statement).all()
-        return users
+def get_participants(promise_id: int, session: Session):
+    statement = select(User).join(UserPromise).where(UserPromise.promise_id == promise_id)
+    users = session.exec(statement).all()
+    return users

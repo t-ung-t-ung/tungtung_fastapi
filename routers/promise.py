@@ -4,8 +4,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlmodel import Session, select, func
-from database.scheme_around import Promise, User, UserPromise
-from database.database import engine, getUser, getCategoryName, getUsersInPromise
+from database.scheme_around import Promise, User, UserPromise, Category
+from database.database import engine, get_participants
 
 router = APIRouter(
     prefix="/promise"
@@ -33,23 +33,22 @@ async def get_promises():
 @router.get("/{promise_id}")
 async def get_promise(promise_id: int):
     with Session(engine) as session:
-        statement = select(Promise).where(Promise.id == promise_id)
-        promise = session.exec(statement).one_or_none()
-        owner = getUser(promise.owner)
-        category = getCategoryName(promise.category_id)
-        participants = getUsersInPromise(promise.id)
-        return {"id": promise.id,
-                "owner": owner,
-                "category": category,
-                "title": promise.title,
-                "detail": promise.detail,
-                "longitude": promise.longitude,
-                "latitude": promise.latitude,
-                "promise_time": promise.promise_time,
-                "image": promise.image,
-                "max_people": promise.max_people,
-                "current_people": participants,
-                "status": promise.status}
+        print(type(session))
+        statement = select(Promise, User, Category).join(User, isouter=False).join(Category, isouter=True).where(Promise.id == promise_id)
+        result = session.exec(statement)
+        for promise, user, category in result:
+            new_promise: dict = promise.dict()
+            del(new_promise['owner'])
+            del(new_promise['category_id'])
+            new_user: dict = user.dict()
+            del(new_user['kakao_id'])
+            new_category: dict = category.dict()
+            print(new_category)
+            new_promise['owner'] = new_user
+            new_promise['category'] = new_category
+        participants = get_participants(new_promise['id'], session)
+        new_promise['people'] = participants
+        return new_promise
 
 # @router.post("/")
 # async def post_promise(newPromise: Promise):
