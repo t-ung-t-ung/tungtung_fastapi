@@ -127,3 +127,23 @@ async def update_promise(promise_id: int, promise: UpdatePromise):
         session.commit()
         session.refresh(current_promise)
         return current_promise
+
+@router.delete("/{promise_id}")
+async def delete_promise(promise_id: int):
+    with Session(engine) as session:
+        promise = session.get(Promise, promise_id)
+        user_promises = session.exec(select(UserPromise).where(UserPromise.promise_id == promise_id)).all()
+
+        print(type(user_promises))
+
+        if not promise:
+            raise HTTPException(status_code=404, detail="Promise not found")
+
+        for user_promise in user_promises:
+            session.delete(user_promise)
+            session.commit()
+
+        session.delete(promise)
+        session.commit()
+
+        return {"result": 1}
