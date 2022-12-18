@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, status, Body
+from fastapi import APIRouter, status, Body, HTTPException
 from sqlmodel import Session, select, func, SQLModel
 from database.scheme_around import Promise, User, UserPromise, Category
 from database.database import engine, get_participants
@@ -13,6 +13,7 @@ class UserResponse(SQLModel):
     id: int
     nickname: str
     image: str
+
 class AllPromise(SQLModel):
     detail: str
     owner: int
@@ -39,6 +40,19 @@ class OnePromise(SQLModel):
     latitude: float
     promise_time: datetime
     max_people: int
+
+class UpdatePromise(SQLModel):
+    title: str | None = None
+    detail: str | None = None
+    # owner: int | None = None
+    category_id: int | None = None
+    image: str | None = None
+    latitude: str | None = None
+    longitude: str | None = None
+    promise_time: datetime | None = None
+    max_people: int | None = None
+    status: int | None = None
+
 
 @router.get("/", response_model=list[AllPromise], status_code=status.HTTP_200_OK)
 async def get_promises():
@@ -98,3 +112,18 @@ async def create_promise(newPromise: Promise = Body(
         session.commit()
         session.refresh(newPromise)
         return newPromise
+
+@router.put("/{promise_id}", response_model=Promise, status_code=status.HTTP_201_CREATED)
+async def update_promise(promise_id: int, promise: UpdatePromise):
+    with Session(engine) as session:
+        current_promise = session.get(Promise, promise_id)
+        if not current_promise:
+            raise HTTPException(status_code=404, detail="Promise not found")
+        new_promise = promise.dict(exclude_unset=True)
+        for key, value in new_promise.items():
+            print(key, value)
+            setattr(current_promise, key, value)
+        session.add(current_promise)
+        session.commit()
+        session.refresh(current_promise)
+        return current_promise
