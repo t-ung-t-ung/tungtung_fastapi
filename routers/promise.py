@@ -41,18 +41,8 @@ class OnePromise(SQLModel):
     promise_time: datetime
     max_people: int
 
-class UpdatePromise(SQLModel):
-    title: str | None = None
-    detail: str | None = None
-    # owner: int | None = None
-    category_id: int | None = None
-    image: str | None = None
-    latitude: str | None = None
-    longitude: str | None = None
-    promise_time: datetime | None = None
-    max_people: int | None = None
-    status: int | None = None
-
+class Result(SQLModel):
+    result: int
 
 @router.get("/", response_model=list[AllPromise], status_code=status.HTTP_200_OK)
 async def get_promises():
@@ -113,28 +103,27 @@ async def create_promise(newPromise: Promise = Body(
         session.refresh(newPromise)
         return newPromise
 
-@router.put("/{promise_id}", response_model=Promise, status_code=status.HTTP_201_CREATED)
-async def update_promise(promise_id: int, promise: UpdatePromise):
+@router.put("/", response_model=Promise, status_code=status.HTTP_200_OK)
+async def update_promise(promise: Promise):
+    if not promise.id:
+        raise HTTPException(status_code=400, detail="Promise id not found")
     with Session(engine) as session:
-        current_promise = session.get(Promise, promise_id)
+        current_promise = session.get(Promise, promise.id)
         if not current_promise:
             raise HTTPException(status_code=404, detail="Promise not found")
         new_promise = promise.dict(exclude_unset=True)
         for key, value in new_promise.items():
-            print(key, value)
             setattr(current_promise, key, value)
         session.add(current_promise)
         session.commit()
         session.refresh(current_promise)
         return current_promise
 
-@router.delete("/{promise_id}")
+@router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
 async def delete_promise(promise_id: int):
     with Session(engine) as session:
         promise = session.get(Promise, promise_id)
         user_promises = session.exec(select(UserPromise).where(UserPromise.promise_id == promise_id)).all()
-
-        print(type(user_promises))
 
         if not promise:
             raise HTTPException(status_code=404, detail="Promise not found")
