@@ -103,7 +103,7 @@ async def create_promise(newPromise: Promise = Body(
         session.refresh(newPromise)
         return newPromise
 
-@router.put("/", response_model=Promise, status_code=status.HTTP_200_OK)
+@router.patch("/", response_model=Promise, status_code=status.HTTP_200_OK)
 async def update_promise(promise: Promise):
     if not promise.id:
         raise HTTPException(status_code=400, detail="Promise id not found")
