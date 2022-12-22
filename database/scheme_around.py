@@ -8,6 +8,9 @@ class User(SQLModel, table=True):
     kakao_id: int = Field(unique=True)
     nickname: str
     image: str
+    age: int | None = Field(nullable=False)
+    gender: int | None = Field(nullable=False)
+    introduction: str | None = Field(nullable=False)
 
 
 class Evaluation(SQLModel, table=True):
@@ -27,7 +30,9 @@ class Promise(SQLModel, table=True):
     detail: str | None = Field(nullable=False)
     latitude: float | None = Field(nullable=False)
     longitude: float | None = Field(nullable=False)
-    promise_time: datetime | None = Field(nullable=False)
+    address: str | None = Field(nullable=False)
+    start_time: datetime | None = Field(nullable=False)
+    end_time: datetime | None = Field(nullable=False)
     image: str | None = Field(nullable=False)
     max_people: int | None = Field(nullable=False)
     status: int | None = Field(nullable=False)
@@ -38,12 +43,14 @@ class UserPromise(SQLModel, table=True):
     user_id: int = Field(foreign_key='user.id')
     promise_id: int = Field(foreign_key='promise.id')
     is_auth: bool
+    status: int | None = Field(nullable=False)
+    start_time: datetime | None = Field(nullable=False)
+    end_time: datetime | None = Field(nullable=False)
 
 
 class Category(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
-    image: str
 
 
 class Chat(SQLModel, table=True):
@@ -53,6 +60,16 @@ class Chat(SQLModel, table=True):
     promise_id: int = Field(foreign_key='promise.id')
     time: datetime
     content: str
+
+
+class Notification(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    message: str
+    type: int
+    status: int
+    time: datetime
+    user_id: int = Field(foreign_key="user.id")
+    promise_id: int | None = Field(foreign_key="promise.id")
 
 
 class Banner(SQLModel, table=True):
