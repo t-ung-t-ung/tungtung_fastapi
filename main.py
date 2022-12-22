@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from database.database import init_database
-from routers import promise, user, auth
+from routers import promise, user, auth, category
 
 app = FastAPI()
 
 app.include_router(promise.router)
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(category.router)
 
 
 @app.on_event("startup")
