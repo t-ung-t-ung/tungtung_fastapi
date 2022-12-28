@@ -19,11 +19,11 @@ class UserResponse(SQLModel):
 class AllPromise(Promise, table=False):
     people: int
 
+
 # class OnePromise(Promise, table=False):
 #     owner_info: UserResponse
 #     category_info: Category
-    # people: list[UserResponse]
-
+# people: list[UserResponse]
 
 
 class Result(SQLModel):
@@ -51,18 +51,16 @@ async def get_promises():
 @router.get("/{promise_id}", status_code=status.HTTP_200_OK)
 async def get_promise(promise_id: int):
     with Session(engine) as session:
-        print(type(session))
         statement = select(Promise, User, Category).join(User, isouter=False).join(Category, isouter=True).where(
             Promise.id == promise_id)
         result = session.exec(statement)
         for promise, user, category in result:
             new_promise: dict = promise.dict()
-            # del (new_promise['owner'])
-            # del (new_promise['category_id'])
+            del (new_promise['owner'])
+            del (new_promise['category_id'])
             new_user: dict = user.dict()
             del (new_user['kakao_id'])
             new_category: dict = category.dict()
-            print(new_category)
             new_promise['owner_info'] = new_user
             new_promise['category_info'] = new_category
         participants = get_participants(new_promise['id'], session)
@@ -94,6 +92,23 @@ async def create_promise(new_promise: Promise = Body(
         return new_promise
 
 
+@router.post("/apply")
+async def apply_promise(user_promise: UserPromise = Body(
+    example=UserPromise(
+        user_id=1,
+        promise_id=1,
+        is_auth=0,
+        start_time='2000-00-00T00:00:00',
+        end_time='2000-00-00T00:00:00'
+    ).json()
+)):
+    user_promise.status = 2
+    with Session(engine) as session:
+        session.add(user_promise)
+        session.commit()
+        return {"result": 1}
+
+
 @router.patch("/", response_model=Promise, status_code=status.HTTP_200_OK)
 async def update_promise(promise: Promise):
     if not promise.id:
@@ -109,6 +124,32 @@ async def update_promise(promise: Promise):
         session.commit()
         session.refresh(current_promise)
         return current_promise
+
+
+@router.patch("/apply/{option}")
+async def apply_promise(option: int, user_promise: UserPromise = Body(
+    example=UserPromise(
+        user_id=1,
+        promise_id=1,
+        is_auth=0,
+    ).json()
+)):
+    with Session(engine) as session:
+        statement = select(UserPromise).where(UserPromise.promise_id == user_promise.promise_id,
+                                              UserPromise.user_id == user_promise.user_id)
+        current_user_promise = session.exec(statement).one()
+
+        print(current_user_promise)
+
+        if option == 1:
+            setattr(current_user_promise, "status", 1)
+        elif option == 0:
+            setattr(current_user_promise, "status", 0)
+
+        session.add(current_user_promise)
+        session.commit()
+
+        return {"result": 1}
 
 
 @router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
