@@ -4,7 +4,6 @@ from sqlmodel import Session, select
 from database.scheme_around import Category
 from database.database import engine
 
-
 router = APIRouter(
     prefix="/categories"
 )
@@ -20,9 +19,7 @@ async def get_all_category():
 
 @router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED)
 async def create_category(category: Category = Body(
-    example=Category(
-        name="운동",
-        image="image_url").json(exclude_none=True)
+    example=Category(name="운동").json(exclude_none=True)
 )):
     with Session(engine) as session:
         session.add(category)
