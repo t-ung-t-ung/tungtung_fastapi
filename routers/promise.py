@@ -106,6 +106,7 @@ async def apply_promise(user_promise: UserPromise = Body(
     with Session(engine) as session:
         session.add(user_promise)
         session.commit()
+
         return {"result": 1}
 
 
@@ -150,6 +151,7 @@ async def apply_promise(option: int, user_promise: UserPromise = Body(
         session.commit()
 
         return {"result": 1}
+
 
 
 @router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
