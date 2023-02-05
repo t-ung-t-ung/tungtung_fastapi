@@ -58,7 +58,7 @@ async def search_promises(sw_latitude: float, sw_longitude: float, ne_latitude: 
                                               Promise.category_id == category_id)
         else:
             statement = select(Promise).where(Promise.latitude > sw_latitude, Promise.longitude > sw_longitude,
-                                          Promise.latitude < ne_latitude, Promise.longitude < ne_longitude)
+                                              Promise.latitude < ne_latitude, Promise.longitude < ne_longitude)
         results = session.exec(statement).all()
         return results
 
@@ -140,13 +140,8 @@ async def update_promise(promise: Promise, promise_id: int):
         return current_promise
 
 
-# option은 어떻게 받을까
 @router.patch("/apply/{option}")
-async def confirm_promise(user_id: int, promise_id: int, option: int, user_promise: UserPromise = Body(
-    example=UserPromise(
-        is_auth=0,
-    ).json()
-)):
+async def confirm_promise(user_id: int, promise_id: int, option: int):
     with Session(engine) as session:
         statement = select(UserPromise).where(UserPromise.promise_id == promise_id,
                                               UserPromise.user_id == user_id)
@@ -163,7 +158,6 @@ async def confirm_promise(user_id: int, promise_id: int, option: int, user_promi
         session.commit()
 
         return {"result": 1}
-
 
 
 @router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
