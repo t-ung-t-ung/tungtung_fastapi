@@ -48,6 +48,21 @@ async def get_promises():
         return output
 
 
+@router.get("/search/")
+async def search_promises(sw_latitude: float, sw_longitude: float, ne_latitude: float, ne_longitude: float,
+                          category_id: int | None = None):
+    with Session(engine) as session:
+        if category_id is not None:
+            statement = select(Promise).where(Promise.latitude > sw_latitude, Promise.longitude > sw_longitude,
+                                              Promise.latitude < ne_latitude, Promise.longitude < ne_longitude,
+                                              Promise.category_id == category_id)
+        else:
+            statement = select(Promise).where(Promise.latitude > sw_latitude, Promise.longitude > sw_longitude,
+                                              Promise.latitude < ne_latitude, Promise.longitude < ne_longitude)
+        results = session.exec(statement).all()
+        return results
+
+
 @router.get("/{promise_id}", status_code=status.HTTP_200_OK)
 async def get_promise(promise_id: int):
     with Session(engine) as session:
@@ -78,12 +93,12 @@ async def create_promise(new_promise: Promise = Body(
         latitude=10.0,
         longitude=10.0,
         address="상세주소",
-        start_time="2000-00-00T00:00:00",
-        end_time="2000-00-00T00:00:00",
+        start_time=datetime.now(),
+        end_time=datetime.now(),
         image="image.img",
         max_people=5,
         status=0
-    ).json()
+    ).json(exclude_none=True)
 )):
     with Session(engine) as session:
         session.add(new_promise)
@@ -98,8 +113,8 @@ async def apply_promise(user_promise: UserPromise = Body(
         user_id=1,
         promise_id=1,
         is_auth=0,
-        start_time='2000-00-00T00:00:00',
-        end_time='2000-00-00T00:00:00'
+        start_time=datetime.now(),
+        end_time=datetime.now()
     ).json()
 )):
     user_promise.status = 2
@@ -110,12 +125,10 @@ async def apply_promise(user_promise: UserPromise = Body(
         return {"result": 1}
 
 
-@router.patch("/", response_model=Promise, status_code=status.HTTP_200_OK)
-async def update_promise(promise: Promise):
-    if not promise.id:
-        raise HTTPException(status_code=400, detail="Promise id not found")
+@router.patch("/{promise_id}", response_model=Promise, status_code=status.HTTP_200_OK)
+async def update_promise(promise: Promise, promise_id: int):
     with Session(engine) as session:
-        current_promise = session.get(Promise, promise.id)
+        current_promise = session.get(Promise, promise_id)
         if not current_promise:
             raise HTTPException(status_code=404, detail="Promise not found")
         new_promise = promise.dict(exclude_unset=True)
@@ -128,16 +141,10 @@ async def update_promise(promise: Promise):
 
 
 @router.patch("/apply/{option}")
-async def apply_promise(option: int, user_promise: UserPromise = Body(
-    example=UserPromise(
-        user_id=1,
-        promise_id=1,
-        is_auth=0,
-    ).json()
-)):
+async def confirm_promise(user_id: int, promise_id: int, option: int):
     with Session(engine) as session:
-        statement = select(UserPromise).where(UserPromise.promise_id == user_promise.promise_id,
-                                              UserPromise.user_id == user_promise.user_id)
+        statement = select(UserPromise).where(UserPromise.promise_id == promise_id,
+                                              UserPromise.user_id == user_id)
         current_user_promise = session.exec(statement).one()
 
         print(current_user_promise)
@@ -151,7 +158,6 @@ async def apply_promise(option: int, user_promise: UserPromise = Body(
         session.commit()
 
         return {"result": 1}
-
 
 
 @router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
