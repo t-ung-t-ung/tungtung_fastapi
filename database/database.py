@@ -1,8 +1,6 @@
 from sqlmodel import create_engine, SQLModel, Session, select
-from database import scheme_around
-from database.scheme_around import User, Category, UserPromise
 
-from database.scheme_around import User, Category
+from database.scheme_around import User, UserPromise, Notification
 
 engine = create_engine(
     f'mysql+pymysql://siun:tldjsWkd!123@3.39.183.137:3306/around',
@@ -28,3 +26,8 @@ def get_participants(promise_id: int, session: Session):
     for user in users:
         del user.kakao_id
     return users
+
+
+def create_notification(notification: Notification, session: Session):
+    session.add(notification)
+    session.commit()
