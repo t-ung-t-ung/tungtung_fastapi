@@ -21,7 +21,10 @@ def get_user(user_id: str):
         user = session.exec(statement).one_or_none()
         return user
 
+
 def get_participants(promise_id: int, session: Session):
-    statement = select(User).join(UserPromise).where(UserPromise.promise_id == promise_id)
+    statement = select(User).join(UserPromise).where(UserPromise.promise_id == promise_id, UserPromise.status == 1)
     users = session.exec(statement).all()
+    for user in users:
+        del user.kakao_id
     return users
