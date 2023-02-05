@@ -1,5 +1,0 @@
-#!/bin/sh
-conda env export --no-builds --from-history -c conda-forge | grep -v "prefix" > env.yaml
-conda env export --no-builds | grep -v "prefix" > temp.yaml
-python .githooks/_pre_commit.py
-git add .
