@@ -5,7 +5,7 @@ from database.scheme_around import User, Category, UserPromise
 from database.scheme_around import User, Category
 
 engine = create_engine(
-    f'mysql+pymysql://siun:tldjsWkd!123@13.125.114.46:3306/around',
+    f'mysql+pymysql://siun:tldjsWkd!123@3.39.183.137:3306/around',
     echo=False)
 
 

@@ -9,42 +9,18 @@ router = APIRouter(
     prefix="/promise"
 )
 
+
 class UserResponse(SQLModel):
     id: int
     nickname: str
     image: str
 
-class AllPromise(SQLModel):
-    detail: str
-    owner: int
-    category_id: int
-    longitude: float
-    image: str
-    status: int
-    title: str
-    id: int
-    latitude: float
-    promise_time: datetime
-    max_people: int
-    people: int
-
-class OnePromise(SQLModel):
-    detail: str
-    owner: UserResponse
-    category: Category
-    longitude: float
-    image: str
-    status: int
-    title: str
-    id: int
-    latitude: float
-    promise_time: datetime
-    max_people: int
 
 class Result(SQLModel):
     result: int
 
-@router.get("/", response_model=list[AllPromise], status_code=status.HTTP_200_OK)
+
+@router.get("/", status_code=status.HTTP_200_OK)
 async def get_promises():
     with Session(engine) as session:
         output = []
@@ -62,18 +38,19 @@ async def get_promises():
         return output
 
 
-@router.get("/{promise_id}", response_model=OnePromise, status_code=status.HTTP_200_OK)
+@router.get("/{promise_id}", status_code=status.HTTP_200_OK)
 async def get_promise(promise_id: int):
     with Session(engine) as session:
         print(type(session))
-        statement = select(Promise, User, Category).join(User, isouter=False).join(Category, isouter=True).where(Promise.id == promise_id)
+        statement = select(Promise, User, Category).join(User, isouter=False).join(Category, isouter=True).where(
+            Promise.id == promise_id)
         result = session.exec(statement)
         for promise, user, category in result:
             new_promise: dict = promise.dict()
-            del(new_promise['owner'])
-            del(new_promise['category_id'])
+            del (new_promise['owner'])
+            del (new_promise['category_id'])
             new_user: dict = user.dict()
-            del(new_user['kakao_id'])
+            del (new_user['kakao_id'])
             new_category: dict = category.dict()
             print(new_category)
             new_promise['owner'] = new_user
@@ -82,8 +59,9 @@ async def get_promise(promise_id: int):
         new_promise['people'] = participants
         return new_promise
 
+
 @router.post("/", response_model=Promise, status_code=status.HTTP_201_CREATED)
-async def create_promise(newPromise: Promise = Body(
+async def create_promise(new_promise: Promise = Body(
     example=Promise(
         owner=1,
         category_id=1,
@@ -98,10 +76,11 @@ async def create_promise(newPromise: Promise = Body(
     ).json()
 )):
     with Session(engine) as session:
-        session.add(newPromise)
+        session.add(new_promise)
         session.commit()
-        session.refresh(newPromise)
-        return newPromise
+        session.refresh(new_promise)
+        return new_promise
+
 
 @router.patch("/", response_model=Promise, status_code=status.HTTP_200_OK)
 async def update_promise(promise: Promise):
@@ -118,6 +97,7 @@ async def update_promise(promise: Promise):
         session.commit()
         session.refresh(current_promise)
         return current_promise
+
 
 @router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
 async def delete_promise(promise_id: int):
