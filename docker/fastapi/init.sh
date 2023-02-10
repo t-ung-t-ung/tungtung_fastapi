@@ -1,3 +1,4 @@
 #!/bin/bash
 
-docker build -f Dockerfile -t tungtung:first . && docker run -p 8000:8000 -v /Users/leejiwon/PycharmProjects/tungtung_fastapi:/workspace --name tungtung --restart unless-stopped tungtung:first
+docker rm tungtung_fastapi
+docker build -f Dockerfile -t tungtung:first . && docker run -p 8000:8000 -v "$(pwd)":/workspace --name tungtung_fastapi --restart unless-stopped tungtung:first
