@@ -9,7 +9,6 @@ app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(category.router)
 
-
 @app.on_event("startup")
 def on_startup():
     init_database()

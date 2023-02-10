@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir \
     python-jose[cryptography] httpx \
     passlib
 
-ENTRYPOINT ["uvicorn", "main:app", "--host=0.0.0.0"]
+ENTRYPOINT ["uvicorn", "main:app", "--host=0.0.0.0", "--reload"]
