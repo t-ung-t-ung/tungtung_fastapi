@@ -3,7 +3,7 @@ from sqlmodel import create_engine, SQLModel, Session, select
 from database.scheme_around import User, UserPromise, Notification
 
 engine = create_engine(
-    f'mysql+pymysql://siun:tldjsWkd!123@3.39.183.137:3306/around',
+    f'mysql+pymysql://root:tldjsWkd!123@3.39.183.137:3306/around',
     echo=False)
 
 
