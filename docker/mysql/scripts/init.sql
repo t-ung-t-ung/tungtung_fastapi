@@ -1,4 +1,5 @@
-create schema around;
+create database if not exists around;
+use around;
 
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category` (
