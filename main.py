@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from database.database import init_database
 from routers import promise, user, auth, category
 
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("firebase/hyu-around-firebase-adminsdk-hwbpd-acbbacf5a4.json")
+firebase_admin.initialize_app(cred)
+
 app = FastAPI()
 
 app.include_router(promise.router)
