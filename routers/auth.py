@@ -36,6 +36,7 @@ security = HTTPBearer()
 
 async def has_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
+    return token
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -46,12 +47,14 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail=str(e))
 
 
-class LoginBody(BaseModel):
-    kakao_id: str = "Q_0R_M8vbxUcBJsqRidM2SDL7SCsxEuviywImIJcCj10lwAAAYUD4FqC"
 
 
+
+@router.post("signIn")
+async def sign_in(token: str = Depends(has_access)):
+    return token
 @router.post("/login")
-async def login(login_body: LoginBody = LoginBody()):
+async def login():
     response = await client.get("https://kapi.kakao.com/v1/user/access_token_info",
                                 headers={"Authorization": f"Bearer {login_body.kakao_id}"})
     kakao_id = response.json().get("id")
