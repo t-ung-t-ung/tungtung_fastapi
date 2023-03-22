@@ -50,9 +50,10 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 
 
-@router.post("signIn")
+@router.post("/signIn")
 async def sign_in(token: str = Depends(has_access)):
     return token
+
 @router.post("/login")
 async def login():
     response = await client.get("https://kapi.kakao.com/v1/user/access_token_info",
