@@ -59,7 +59,7 @@ class Chat(SQLModel, table=True):
     type: int
     user_id: int = Field(foreign_key='user.id')
     promise_id: int = Field(foreign_key='promise.id')
-    time: datetime
+    time: datetime = Field(default=datetime.now())
     content: str
 
 
