@@ -55,7 +55,7 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
         print("hi2222")
         print(jwt.decode(signature, header["kid"], "RS256"))
         return True
-
+    print(credentials.credentials)
     tokens = list(map(fix_padding, credentials.credentials.split(".")))
 
     if not await verify_token(json.loads(base64.b64decode(tokens[0]).decode()),
