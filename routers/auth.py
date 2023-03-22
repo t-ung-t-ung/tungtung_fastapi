@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
@@ -36,7 +37,8 @@ security = HTTPBearer()
 
 async def has_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
-    return token
+
+    return base64.b64decode(token.split(".")[0])
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
