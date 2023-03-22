@@ -52,15 +52,15 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
             return False
         if header["kid"] not in await kakao_public_key():
             return False
-        print("hi2222")
         print(jwt.decode(signature, header["kid"], "RS256"))
         return True
-    print(credentials.credentials)
-    tokens = list(map(fix_padding, credentials.credentials.split(".")))
 
-    if not await verify_token(json.loads(base64.b64decode(tokens[0]).decode()),
-                        json.loads(base64.b64decode(tokens[1]).decode()),
-                        base64.b64decode(tokens[2])):
+    print(credentials.credentials)
+    tokens = credentials.credentials.split(".")
+
+    if not await verify_token(json.loads(base64.b64decode(fix_padding(tokens[0])).decode()),
+                              json.loads(base64.b64decode(fix_padding(tokens[1])).decode()),
+                              tokens[2]):
         pass
     return f"hi"
 
