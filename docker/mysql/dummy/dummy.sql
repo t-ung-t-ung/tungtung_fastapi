@@ -19,6 +19,7 @@
 -- Table structure for table `banner`
 --
 
+use around;
 DROP TABLE IF EXISTS `banner`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
