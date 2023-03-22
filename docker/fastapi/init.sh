@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker rm tungtung_fastapi
+docker rm -f tungtung_fastapi
 
 docker build -f Dockerfile -t tungtung:first .
 cd ../../
