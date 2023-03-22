@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
@@ -12,6 +13,7 @@ from sqlmodel import Session
 from database.scheme_around import User
 from database.database import get_user, engine
 from network.http_client import client
+from util import kakao_public_key
 
 router = APIRouter(
     prefix="/auth"
@@ -39,11 +41,27 @@ security = HTTPBearer()
 async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     def fix_padding(token):
         return token + "=" * (4 - len(token) % 4)
+
+
+    def verify_token(header, payload, signature):
+        if payload["iss"] != "https://kauth.kakao.com":
+            return False
+        if payload["iss"] != "85fd169ddc2baf6b6237dbfbcbcc1e02":
+            return False
+        if payload["exp"] < time.time():
+            return False
+        if header["kid"] not in kakao_public_key():
+            return False
+        print("hi2222")
+        print(jwt.decode(signature, header["kid"], "RS256"))
+        return True
+
     tokens = list(map(fix_padding, credentials.credentials.split(".")))
-    header = json.loads(base64.b64decode(tokens[0]))
-    payload = json.loads(base64.b64decode(tokens[1]))
+    header = json.loads(base64.b64decode(tokens[0])).decode()
+    payload = json.loads(base64.b64decode(tokens[1])).decode()
     signature = base64.b64decode(tokens[2])
-    print(header, payload, signature, sep="\n")
+    if not verify_token(tokens, header, payload):
+        print(header, payload, signature, sep="\n")
     return f"hi"
 
     try:
@@ -55,12 +73,10 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
             detail=str(e))
 
 
-
-
-
 @router.post("/signIn")
 async def sign_in(token: str = Depends(has_kakao_access)):
     return token
+
 
 @router.post("/login")
 async def login():
