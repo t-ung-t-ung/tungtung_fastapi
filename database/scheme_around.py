@@ -11,6 +11,7 @@ class User(SQLModel, table=True):
     age: int | None = Field(nullable=False)
     gender: int | None = Field(nullable=False)
     introduction: str | None = Field(nullable=False)
+    fcm_token: str | None = Field(nullable=False)
 
 
 class Evaluation(SQLModel, table=True):
