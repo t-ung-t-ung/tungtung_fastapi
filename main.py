@@ -6,6 +6,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 from firebase.send import send_message
+from util import kakao_public_key
 
 registration_token = 'fRd8eXP7RISDQZ4qHQCi_m:APA91bEoyZJo4qkMeK3Ti_jgPgmZnNJnU0fMAAEIJ2rR9rtSh9kXg_2bsA9p-REqby3vua49dj3PxDgesvrJjv4gKC6t8Kj3hN1et125muzrNtnwa6TKv2AK8yrEw36J4zVHJXizI0G1'
 
@@ -23,7 +24,7 @@ app.include_router(chat.router)
 
 
 @app.on_event("startup")
-def on_startup():
+async def on_startup():
     init_database()
 
 
