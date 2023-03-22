@@ -51,7 +51,7 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
             return False
         if payload["exp"] < time.time():
             return False
-        if header["kid"] not in kakao_public_key():
+        if header["kid"] not in await kakao_public_key():
             return False
         print("hi2222")
         print(jwt.decode(signature, header["kid"], "RS256"))
