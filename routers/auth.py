@@ -1,4 +1,5 @@
 import base64
+import json
 from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
@@ -35,10 +36,13 @@ class TokenData(BaseModel):
 security = HTTPBearer()
 
 
-async def has_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-
-    return base64.b64decode(token.split(".")[0])
+async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials.split(".")
+    header = json.loads(base64.b64decode(token[0]))
+    payload = json.loads(base64.b64decode(token[1]))
+    signature = base64.b64decode(token[2])
+    print(header, payload, signature, sep="\n")
+    return f"hi"
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -53,7 +57,7 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 
 @router.post("/signIn")
-async def sign_in(token: str = Depends(has_access)):
+async def sign_in(token: str = Depends(has_kakao_access)):
     return token
 
 @router.post("/login")
@@ -84,7 +88,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(payload: dict = Depends(has_access)):
+async def get_current_user(payload: dict = Depends(has_kakao_access)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
