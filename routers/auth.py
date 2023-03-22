@@ -39,6 +39,7 @@ security = HTTPBearer()
 async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials.split(".")
     header = json.loads(base64.b64decode(token[0]))
+    print(token[1])
     payload = json.loads(base64.b64decode(token[1]))
     signature = base64.b64decode(token[2])
     print(header, payload, signature, sep="\n")
