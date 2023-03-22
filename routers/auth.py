@@ -44,9 +44,10 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
     def verify_token(header, payload, signature):
+        print(header, payload, signature, sep="\n")
         if payload["iss"] != "https://kauth.kakao.com":
             return False
-        if payload["iss"] != "85fd169ddc2baf6b6237dbfbcbcc1e02":
+        if payload["aud"] != "85fd169ddc2baf6b6237dbfbcbcc1e02":
             return False
         if payload["exp"] < time.time():
             return False
@@ -57,11 +58,10 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
         return True
 
     tokens = list(map(fix_padding, credentials.credentials.split(".")))
-    header = json.loads(base64.b64decode(tokens[0]).decode())
-    payload = json.loads(base64.b64decode(tokens[1]).decode())
-    signature = base64.b64decode(tokens[2])
-    print(header, payload, signature, sep="\n")
-    if not verify_token(tokens, header, payload):
+
+    if not verify_token(json.loads(base64.b64decode(tokens[0]).decode()),
+                        json.loads(base64.b64decode(tokens[1]).decode()),
+                        base64.b64decode(tokens[2])):
         pass
     return f"hi"
 
