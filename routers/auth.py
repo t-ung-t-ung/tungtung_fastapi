@@ -42,8 +42,7 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
     def fix_padding(token):
         return token + "=" * (4 - len(token) % 4)
 
-
-    def verify_token(header, payload, signature):
+    async def verify_token(header, payload, signature):
         print(header, payload, signature, sep="\n")
         if payload["iss"] != "https://kauth.kakao.com":
             return False
