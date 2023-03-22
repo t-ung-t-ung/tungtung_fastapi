@@ -37,11 +37,12 @@ security = HTTPBearer()
 
 
 async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials.split(".")
-    header = json.loads(base64.b64decode(token[0]))
-    print(token[1])
-    payload = json.loads(base64.b64decode(token[1]))
-    signature = base64.b64decode(token[2])
+    def fix_padding(token):
+        return token + "=" * (4 - len(token) % 4)
+    tokens = list(map(fix_padding, credentials.credentials.split(".")))
+    header = json.loads(base64.b64decode(tokens[0]))
+    payload = json.loads(base64.b64decode(tokens[1]))
+    signature = base64.b64decode(tokens[2])
     print(header, payload, signature, sep="\n")
     return f"hi"
 
