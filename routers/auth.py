@@ -58,7 +58,7 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
 
     tokens = list(map(fix_padding, credentials.credentials.split(".")))
 
-    if not verify_token(json.loads(base64.b64decode(tokens[0]).decode()),
+    if not await verify_token(json.loads(base64.b64decode(tokens[0]).decode()),
                         json.loads(base64.b64decode(tokens[1]).decode()),
                         base64.b64decode(tokens[2])):
         pass
