@@ -20,17 +20,11 @@ class AllPromise(Promise, table=False):
     people: int
 
 
-# class OnePromise(Promise, table=False):
-#     owner_info: UserResponse
-#     category_info: Category
-# people: list[UserResponse]
-
-
 class Result(SQLModel):
     result: int
 
 
-@router.get("/", response_model=list[AllPromise], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[AllPromise], status_code=status.HTTP_200_OK, tags=['Promise'])
 async def get_promises():
     with Session(engine) as session:
         output = []
@@ -48,7 +42,7 @@ async def get_promises():
         return output
 
 
-@router.get("/search/")
+@router.get("/search/", tags=['Promise'])
 async def search_promises(sw_latitude: float, sw_longitude: float, ne_latitude: float, ne_longitude: float,
                           category_id: int | None = None):
     with Session(engine) as session:
@@ -63,7 +57,7 @@ async def search_promises(sw_latitude: float, sw_longitude: float, ne_latitude: 
         return results
 
 
-@router.get("/{promise_id}", status_code=status.HTTP_200_OK)
+@router.get("/{promise_id}", status_code=status.HTTP_200_OK, tags=['Promise'])
 async def get_promise(promise_id: int):
     with Session(engine) as session:
         statement = select(Promise, User, Category).join(User, isouter=False).join(Category, isouter=True).where(
@@ -83,7 +77,7 @@ async def get_promise(promise_id: int):
         return new_promise
 
 
-@router.post("/", response_model=Promise, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Promise, status_code=status.HTTP_201_CREATED, tags=['Promise'])
 async def create_promise(new_promise: Promise = Body(
     example=Promise(
         owner=1,
@@ -107,7 +101,7 @@ async def create_promise(new_promise: Promise = Body(
         return new_promise
 
 
-@router.post("/apply")
+@router.post("/apply", tags=['Promise'])
 async def apply_promise(user_promise: UserPromise = Body(
     example=UserPromise(
         user_id=1,
@@ -125,7 +119,7 @@ async def apply_promise(user_promise: UserPromise = Body(
         return {"result": 1}
 
 
-@router.patch("/{promise_id}", response_model=Promise, status_code=status.HTTP_200_OK)
+@router.patch("/{promise_id}", response_model=Promise, status_code=status.HTTP_200_OK, tags=['Promise'])
 async def update_promise(promise: Promise, promise_id: int):
     with Session(engine) as session:
         current_promise = session.get(Promise, promise_id)
@@ -140,7 +134,7 @@ async def update_promise(promise: Promise, promise_id: int):
         return current_promise
 
 
-@router.patch("/apply/{option}")
+@router.patch("/apply/{option}", tags=['Promise'])
 async def confirm_promise(user_id: int, promise_id: int, option: int):
     with Session(engine) as session:
         statement = select(UserPromise).where(UserPromise.promise_id == promise_id,
@@ -160,7 +154,7 @@ async def confirm_promise(user_id: int, promise_id: int, option: int):
         return {"result": 1}
 
 
-@router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK)
+@router.delete("/{promise_id}", response_model=Result, status_code=status.HTTP_200_OK, tags=['Promise'])
 async def delete_promise(promise_id: int):
     with Session(engine) as session:
         promise = session.get(Promise, promise_id)

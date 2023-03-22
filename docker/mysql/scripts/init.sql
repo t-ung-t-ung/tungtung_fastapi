@@ -1,3 +1,4 @@
+create schema around;
 use around;
 
 DROP TABLE IF EXISTS `category`;
