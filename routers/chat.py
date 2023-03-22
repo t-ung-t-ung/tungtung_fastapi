@@ -10,6 +10,14 @@ router = APIRouter(
 )
 
 
+@router.get("/", response_model=list[Chat], status_code=status.HTTP_200_OK, tags=['chat'])
+async def get_all_chat():
+    with Session(engine) as session:
+        statement = select(Chat)
+        chats = session.exec(statement).all()
+        return chats
+
+
 @router.post("/", response_model=Chat, status_code=status.HTTP_201_CREATED, tags=['chat'])
 async def create_chat(chat: Chat = Body(
     example=Chat(
