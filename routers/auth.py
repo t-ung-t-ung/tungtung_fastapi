@@ -59,9 +59,10 @@ async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(s
     tokens = list(map(fix_padding, credentials.credentials.split(".")))
     header = json.loads(base64.b64decode(tokens[0]).decode())
     payload = json.loads(base64.b64decode(tokens[1]).decode())
-    signature = base64.b64decode(tokens[2]).decode()
+    signature = base64.b64decode(tokens[2]).decode("ascii")
+    print(header, payload, signature, sep="\n")
     if not verify_token(tokens, header, payload):
-        print(header, payload, signature, sep="\n")
+        pass
     return f"hi"
 
     try:
