@@ -5,10 +5,12 @@ from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError, jwt, JOSEError
+from jose import JWTError, jwt, JOSEError, ExpiredSignatureError
+from jose.exceptions import JWTClaimsError
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlmodel import Session
+from starlette.responses import JSONResponse
 
 from database.scheme_around import User
 from database.database import get_user, engine
@@ -38,61 +40,71 @@ class TokenData(BaseModel):
 security = HTTPBearer()
 
 
+async def verify_token(header, payload, credential):
+    if payload["iss"] != "https://kauth.kakao.com":
+        return False
+    if payload["aud"] != "85fd169ddc2baf6b6237dbfbcbcc1e02":
+        return False
+    if payload["exp"] < time.time():
+        return False
+    keys = await kakao_public_key()
+    for key in keys["keys"]:
+        if key["kid"] == header["kid"]:
+            try:
+                jwt.decode(credential, key, "RS256", audience=payload["aud"])
+            except (JWTError, ExpiredSignatureError, JWTClaimsError) as e:
+                raise HTTPException(
+                    status_code=401,
+                    detail=str(e))
+            return True
+    return False
+
+
+def fix_padding(token):
+    return token + "=" * (4 - len(token) % 4)
+
+
 async def has_kakao_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    def fix_padding(token):
-        return token + "=" * (4 - len(token) % 4)
+    credential = credentials.credentials
+    tokens = credential.split(".")
+    header = json.loads(base64.b64decode(fix_padding(tokens[0])).decode())
+    payload = json.loads(base64.b64decode(fix_padding(tokens[1])).decode())
 
-    async def verify_token(header, payload, signature):
-        print(header, payload, signature, sep="\n")
-        if payload["iss"] != "https://kauth.kakao.com":
-            return False
-        if payload["aud"] != "85fd169ddc2baf6b6237dbfbcbcc1e02":
-            return False
-        if payload["exp"] < time.time():
-            return False
-        if header["kid"] not in await kakao_public_key():
-            return False
-        print(jwt.decode(signature, header["kid"], "RS256"))
-        return True
-
-    print(credentials.credentials)
-    tokens = credentials.credentials.split(".")
-
-    if not await verify_token(json.loads(base64.b64decode(fix_padding(tokens[0])).decode()),
-                              json.loads(base64.b64decode(fix_padding(tokens[1])).decode()),
-                              tokens[2]):
-        pass
-    return f"hi"
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    if await verify_token(header, payload, credential):
         return payload
-    except JOSEError as e:  # catches any exception
-        raise HTTPException(
-            status_code=401,
-            detail=str(e))
+    return None
 
 
-@router.post("/signIn")
-async def sign_in(token: str = Depends(has_kakao_access)):
-    return token
+async def get_kakao_id(token: dict | None = Depends(has_kakao_access)):
+    if token is None:
+        return None
+    return token["sub"]
 
 
-@router.post("/login")
-async def login():
-    response = await client.get("https://kapi.kakao.com/v1/user/access_token_info",
-                                headers={"Authorization": f"Bearer {login_body.kakao_id}"})
-    kakao_id = response.json().get("id")
-    if not kakao_id:
-        raise HTTPException(
-            status_code=401,
-            detail="bad access token")
+@router.post("/signIn", tags=["Auth"],
+             responses={
+                 404: {"description": "카카오 아이디에 해당하는 유저가 없기 때문에 회원가입을 해야 합니다.",
+                       "content": {
+                           "application/json": {
+                               "example": {"message": "No matching user."}
+                           }
+                       }},
+                 200: {
+                     "description": "앱을 사용하기 위한 액세스 토큰 발급.",
+                     "content": {
+                         "application/json": {
+                             "example": {"access_token": "{access_token}"}
+                         }
+                     },
+                 },
+             })
+def sign_in(kakao_id: str | None = Depends(get_kakao_id)):
     with Session(engine) as session:
         user = session.exec(select(User).where(User.kakao_id == kakao_id)).one_or_none()
         if user:
-            return {"access_token": create_access_token({"user_id": user.id})}
+            return {"access_token": create_access_token({"access_token": user.id})}
         else:
-            return {"test": create_access_token({"user_id": 2})}
+            return JSONResponse(status_code=404, content={"message": "No matching user."})
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
