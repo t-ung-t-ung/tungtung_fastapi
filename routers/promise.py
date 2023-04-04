@@ -42,6 +42,28 @@ async def get_promises():
         return output
 
 
+@router.get("/my", response_model=list[AllPromise], status_code=status.HTTP_200_OK, tags=['Promise'])
+async def get_my_promises(user_id: int, is_owner: int = 0):
+    with Session(engine) as session:
+        output = []
+
+        statement = select(Promise, func.count(UserPromise.id)).join(UserPromise, isouter=True)\
+            .where(UserPromise.user_id == user_id, UserPromise.status == 1).group_by(Promise.id)
+        results = session.exec(statement)
+
+        for promise, user_number in results:
+            if is_owner == 1 and promise.owner != user_id:
+                continue
+            if user_number:
+                user_number = int(user_number)
+            else:
+                user_number = 0
+            new_promise: dict = promise.dict()
+            new_promise["people"] = user_number
+            output.append(new_promise)
+        return output
+
+
 @router.get("/search/", tags=['Promise'])
 async def search_promises(sw_latitude: float, sw_longitude: float, ne_latitude: float, ne_longitude: float,
                           category_id: int | None = None):
@@ -98,6 +120,17 @@ async def create_promise(new_promise: Promise = Body(
         session.add(new_promise)
         session.commit()
         session.refresh(new_promise)
+
+        session.add(UserPromise(
+            user_id=new_promise.owner,
+            promise_id=new_promise.id,
+            is_auth=0,
+            start_time=datetime.now(),
+            end_time=datetime.now(),
+            status=1,
+        ))
+        session.commit()
+
         return new_promise
 
 
